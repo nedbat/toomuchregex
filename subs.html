@@ -1,0 +1,314 @@
+<!DOCTYPE html> <!-- vim: set foldmethod=marker foldlevel=0 cc=60 :-->
+<!--
+Values to change when making a new prez:
+
+    blank.html -> name of this file.
+    shorturl -> bit.ly short url, or remove those lines.
+
+Process this file with cog:
+
+    $ pip install -r requirements.txt
+    $ python -m cogapp -r blank.html
+
+-->
+<html>
+<!-- *** Head stuff {{{ -->
+<!--[[[cog
+import cog
+from cogutil import *
+]]]-->
+<!--[[[end]]]-->
+<head>
+<title>Too much regex?</title>
+<meta charset="utf-8" />
+
+    <!-- *** Includes {{{ -->
+    <!-- Slippy core file and dependencies -->
+    <script type="text/javascript" src="slippy/jquery.min.js"></script>
+    <script type="text/javascript" src="slippy/jquery.history.js"></script>
+    <script type="text/javascript" src="slippy/slippy.js"></script>
+    <script type="text/javascript" src="typogr.min.js"></script>
+
+    <!-- Slippy structural styles -->
+    <link type="text/css" rel="stylesheet" href="slippy/slippy.css"/>
+    <!-- Slippy theme -->
+    <link type="text/css" rel="stylesheet" href="slippy/slippy-pure.css"/>
+    <!-- Our styles -->
+    <link type="text/css" rel="stylesheet" href="slides.css"/>
+
+    <!-- Highlight, for syntax coloring. -->
+    <script type="text/javascript" src="highlight/highlight.pack.js"></script>
+    <link rel="stylesheet" href="highlight/vs.css">
+
+    <script type="text/javascript" src="lineselect.js"></script>
+
+    <!-- http://html.adobe.com/edge/webfonts/ -->
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,600,700,800' rel='stylesheet' type='text/css'>
+    <!-- }}} -->
+
+    <script type="text/javascript" src="slides.js"></script>
+    <!-- }}} -->
+
+    <!-- *** Custom style for this deck {{{ -->
+    <style type="text/css">
+    </style>
+    <!-- }}} -->
+
+</head>
+<!-- }}} -->
+<body class="slides">
+
+<div class="slide title" data-layout="clean">
+    <h1>Too much regex?</h1>
+    <h2>
+        Ned Batchelder<br/>
+        <a class="implicit" href="http://twitter.com/nedbat">@nedbat</a>
+    </h2>
+</div>
+
+<div class="slide">
+    <h1>The goal</h1>
+    <!--[[[cog include_file_default(fname="substitute.py")   ]]] {{{ -->
+    <!--[[[end]]] }}} -->
+    <!--[[[cog include_file(start_from="def substitute", end_at='"""', end_nth=2)   ]]] {{{ -->
+    <pre class='python'>
+    def substitute_variables(text, variables=os.environ):
+        """
+        Substitute ``${VAR}`` variables in `text`.
+
+        Variables in the text can take a number of
+        shell-inspired forms::
+
+            $VAR
+            ${VAR}
+            ${VAR?}         strict: an error if no VAR.
+            ${VAR-miss}     defaulted: "miss" if no VAR.
+            $$              just a dollar sign.
+
+        `variables` is a dictionary of variable values,
+        defaulting to the environment variables.
+
+        Returns the resulting text with values substituted.
+
+        """
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide">
+    <h1>In action</h1>
+    <!--[[[cog include_file(fname="test_substitute.py", start_from="test_substitute(", end_at="assert")   ]]] {{{ -->
+    <pre class='python'>
+    def test_substitute():
+        before = "Look: $FOO ${BAR-default} $$"
+        data = {'FOO': 'Xyzzy'}
+        after = substitute_variables(before, data)
+        assert after == "Look: Xyzzy default $"
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide">
+    <h1>The regex!</h1>
+    <!--[[[cog include_file(start_from="dollar_pattern", end_at='"""')   ]]] {{{ -->
+    <pre class='python'>
+    dollar_pattern = r"""(?x)   # Verbose regex syntax
+        \$                      # A dollar sign,
+        (?:                     # then
+            (?P&lt;w1&gt; \w+ ) |         # a plain word, or
+            (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
+            {                       # a {-wrapped
+                (?P&lt;w2&gt; \w+ )           # word,
+                (?:
+                    (?P&lt;strict&gt; \? ) |      # strict or
+                    -(?P&lt;defval&gt; [^}]* )    # defaulted
+                )?                      # maybe
+            }
+        )
+        """
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide">
+    <h1>Using it</h1>
+    <!--[[[cog include_file(start_from="text =", end_at="return")   ]]] {{{ -->
+    <pre class='python'>
+    text = re.sub(dollar_pattern, dollar_replace, text)
+    return text
+    </pre>
+    <!--[[[end]]] }}} -->
+    
+    <div class="incremental">
+    <!--[[[cog include_file(start_from="def dollar_replace", end_at='"""')   ]]] {{{ -->
+    <pre class='python'>
+    def dollar_replace(m):
+        """Called for each $replacement."""
+    </pre>
+    <!--[[[end]]] }}} -->
+    </div>
+</div>
+
+<div class="slide">
+    <h1>Replacement</h1>
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return m.group")   ]]] {{{ -->
+    <pre class='python'>
+    def dollar_replace(m):
+        """Called for each $replacement."""
+        # Get the one group that matched.
+        groups = m.group('w1', 'w2', 'dollar')
+        word = next(g for g in groups if g)
+
+        if word == "$":
+            return "$"
+        elif word in variables:
+            return variables[word]
+        elif m.group('strict'):
+            msg = "Variable {} is undefined: {!r}"
+            raise NameError(msg.format(word, text))
+        else:
+            return m.group('defval') or ''
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide">
+    <h1>Boo: any()</h1>
+    <ul>
+    <li class="incremental">These are similar:
+        <pre class='python'>
+        any([x, y, z])
+        </pre>
+        <pre class='python'>
+        x or y or z
+        </pre>
+    </li>
+    <li class="incremental">Except!
+        <pre class='python'>
+        any([x, y, z])      # returns True or False
+        </pre>
+        <pre class='python'>
+        x or y or z         # returns the true thing
+        </pre>
+    </li>
+    </ul>
+</div>
+
+<div class="slide">
+    <h1>If only</h1>
+    <pre class='python'>
+    groups = (None, "something", None)
+    word = any(groups)      # DOESN'T WORK!  ☹
+    </pre>
+    <pre class='incremental python'>
+    groups = (None, "something", None)
+    word = next(g for g in groups if g)
+    </pre>
+</div>
+
+<div class="slide">
+    <h1>Replacement</h1>
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return m.group")   ]]] {{{ -->
+    <pre class='python'>
+    def dollar_replace(m):
+        """Called for each $replacement."""
+        # Get the one group that matched.
+        groups = m.group('w1', 'w2', 'dollar')
+        word = next(g for g in groups if g)
+
+        if word == "$":
+            return "$"
+        elif word in variables:
+            return variables[word]
+        elif m.group('strict'):
+            msg = "Variable {} is undefined: {!r}"
+            raise NameError(msg.format(word, text))
+        else:
+            return m.group('defval') or ''
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide">
+    <!--[[[cog include_file(start_from="def subs", classes="s40") ]]] {{{ -->
+    <pre class='python s40'>
+    def substitute_variables(text, variables=os.environ):
+        """
+        Substitute ``${VAR}`` variables in `text`.
+
+        Variables in the text can take a number of
+        shell-inspired forms::
+
+            $VAR
+            ${VAR}
+            ${VAR?}         strict: an error if no VAR.
+            ${VAR-miss}     defaulted: "miss" if no VAR.
+            $$              just a dollar sign.
+
+        `variables` is a dictionary of variable values,
+        defaulting to the environment variables.
+
+        Returns the resulting text with values substituted.
+
+        """
+        dollar_pattern = r"""(?x)   # Verbose regex syntax
+            \$                      # A dollar sign,
+            (?:                     # then
+                (?P&lt;w1&gt; \w+ ) |         # a plain word, or
+                (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
+                {                       # a {-wrapped
+                    (?P&lt;w2&gt; \w+ )           # word,
+                    (?:
+                        (?P&lt;strict&gt; \? ) |      # strict or
+                        -(?P&lt;defval&gt; [^}]* )    # defaulted
+                    )?                      # maybe
+                }
+            )
+            """
+
+        def dollar_replace(m):
+            """Called for each $replacement."""
+            # Get the one group that matched.
+            groups = m.group('w1', 'w2', 'dollar')
+            word = next(g for g in groups if g)
+
+            if word == "$":
+                return "$"
+            elif word in variables:
+                return variables[word]
+            elif m.group('strict'):
+                msg = "Variable {} is undefined: {!r}"
+                raise NameError(msg.format(word, text))
+            else:
+                return m.group('defval') or ''
+
+        text = re.sub(dollar_pattern, dollar_replace, text)
+        return text
+    </pre>
+    <!--[[[end]]] }}} -->
+</div>
+
+<div class="slide title" data-layout="clean">
+    <h1 style="padding-top: 0em">Too much?<br/><br/>Thanks</h1>
+    <h2 style="margin-top: 5em">
+        <a class="implicit" href="http://twitter.com/nedbat">@nedbat</a>
+    </h2>
+</div>
+
+<!-- ** Layouts {{{ -->
+<div class="layout" data-name="default">
+    <content></content>
+    <div class="footer">
+        <!-- <span class="left"><a class="implicit" href="http://bit.ly/shorturl">bit.ly<span class='punct'>/</span>shorturl</a></span> -->
+        <span class="right"><a class="implicit" href="http://twitter.com/nedbat"><span class='punct'>@</span>nedbat</a></span>
+        <hr class="defloat" />
+    </div>
+</div>
+
+<div class="layout nofooter" data-name="clean">
+    <content></content>
+</div>
+<!-- }}} -->
+
+</body>
+</html>
