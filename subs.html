@@ -167,13 +167,13 @@ from cogutil import *
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval') or ''
+            return m.group('defval') or ""
     </pre>
     <!--[[[end]]] }}} -->
 </div>
 
 <div class="slide">
-    <h1>Boo: any()</h1>
+    <h1>Side rant: any()</h1>
     <ul>
     <li class="incremental">These are similar:
         <pre class='python'>
@@ -224,7 +224,7 @@ from cogutil import *
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval') or ''
+            return m.group('defval') or ""
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -280,7 +280,7 @@ from cogutil import *
                 msg = "Variable {} is undefined: {!r}"
                 raise NameError(msg.format(word, text))
             else:
-                return m.group('defval') or ''
+                return m.group('defval') or ""
 
         text = re.sub(dollar_pattern, dollar_replace, text)
         return text

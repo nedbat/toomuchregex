@@ -49,7 +49,7 @@ def substitute_variables(text, variables=os.environ):
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval') or ''
+            return m.group('defval') or ""
 
     text = re.sub(dollar_pattern, dollar_replace, text)
     return text
