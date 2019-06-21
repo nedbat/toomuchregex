@@ -2,3 +2,4 @@ cogapp
 six
 lxml
 cssselect
+pytest
