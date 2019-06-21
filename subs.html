@@ -177,18 +177,18 @@ from cogutil import *
     <ul>
     <li class="incremental">These are similar:
         <pre class='python'>
-        any([x, y, z])
+        x or y or z
         </pre>
         <pre class='python'>
-        x or y or z
+        any([x, y, z])
         </pre>
     </li>
     <li class="incremental">Except!
         <pre class='python'>
-        any([x, y, z])      # returns True or False
+        x or y or z         # returns the true thing
         </pre>
         <pre class='python'>
-        x or y or z         # returns the true thing
+        any([x, y, z])      # returns True or False
         </pre>
     </li>
     </ul>
