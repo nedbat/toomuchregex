@@ -72,7 +72,9 @@ $(function() {
         var lines = $e.html().split("\n");
         if (lines.length > 1) {
             for (var i = 0; i < lines.length; i++) {
-                lines[i] = "<span class='string'>" + lines[i] + "</span>";
+                if (lines[i] !== "") {
+                    lines[i] = "<span class='string'>" + lines[i] + "</span>";
+                }
             }
             $e.replaceWith(lines.join("\n"));
         }
