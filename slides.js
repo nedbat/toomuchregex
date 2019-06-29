@@ -66,6 +66,18 @@ $(function() {
         hljs.highlightBlock(e, '    ');
     });
 
+    // Convert multi-line strings to a span per line.
+    $('span.string').each(function (i, e) {
+        var $e = $(e);
+        var lines = $e.html().split("\n");
+        if (lines.length > 1) {
+            for (var i = 0; i < lines.length; i++) {
+                lines[i] = "<span class='string'>" + lines[i] + "</span>";
+            }
+            $e.replaceWith(lines.join("\n"));
+        }
+    });
+
     // Convert <pre> to have <span class='line'> for each line.
     $('pre').each(function (i, e) {
         var $e = $(e);
