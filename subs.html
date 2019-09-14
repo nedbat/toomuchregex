@@ -72,7 +72,7 @@ from cogutil import *
     <!--[[[end]]] }}} -->
     <!--[[[cog include_file(start_from="def substitute", end_at='"""', end_nth=2)   ]]] {{{ -->
     <pre class='python'>
-    def substitute_variables(text, variables=os.environ):
+    def substitute_variables(text, variables):
         """
         Substitute ``${VAR}`` variables in `text`.
 
@@ -85,8 +85,7 @@ from cogutil import *
             ${VAR-miss}     defaulted: "miss" if no VAR.
             $$              just a dollar sign.
 
-        `variables` is a dictionary of variable values,
-        defaulting to the environment variables.
+        `variables` is a dictionary of variable values.
 
         Returns the resulting text with values substituted.
 
@@ -232,7 +231,7 @@ from cogutil import *
 <div class="slide">
     <!--[[[cog include_file(start_from="def subs", classes="s40") ]]] {{{ -->
     <pre class='python s40'>
-    def substitute_variables(text, variables=os.environ):
+    def substitute_variables(text, variables):
         """
         Substitute ``${VAR}`` variables in `text`.
 
@@ -245,8 +244,7 @@ from cogutil import *
             ${VAR-miss}     defaulted: "miss" if no VAR.
             $$              just a dollar sign.
 
-        `variables` is a dictionary of variable values,
-        defaulting to the environment variables.
+        `variables` is a dictionary of variable values.
 
         Returns the resulting text with values substituted.
 

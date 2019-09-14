@@ -1,7 +1,7 @@
 import os
 import re
 
-def substitute_variables(text, variables=os.environ):
+def substitute_variables(text, variables):
     """
     Substitute ``${VAR}`` variables in `text`.
 
@@ -14,8 +14,7 @@ def substitute_variables(text, variables=os.environ):
         ${VAR-miss}     defaulted: "miss" if no VAR.
         $$              just a dollar sign.
 
-    `variables` is a dictionary of variable values,
-    defaulting to the environment variables.
+    `variables` is a dictionary of variable values.
 
     Returns the resulting text with values substituted.
 
