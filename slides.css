@@ -101,6 +101,11 @@ img.icon {
     text-align: center !important;
 }
 
+.slide *::selection {
+    background-color: #ccf;
+    color: black;
+}
+
 /* Styled the same as an h1 */
 .big {
     font-weight: 700;
