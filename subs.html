@@ -197,11 +197,12 @@ from cogutil import *
     <h1>If only</h1>
     <pre class='python'>
     groups = (None, "something", None)
-    word = any(groups)      # DOESN'T WORK!  ☹
+    </pre>
+    <pre class='python'>
+    word = any(groups)                      # DOESN'T WORK! ☹
     </pre>
     <pre class='incremental python'>
-    groups = (None, "something", None)
-    word = next(g for g in groups if g)
+    word = next(g for g in groups if g)     # UGLY, but works
     </pre>
 </div>
 
