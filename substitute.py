@@ -22,10 +22,10 @@ def substitute_variables(text, variables):
     dollar_pattern = r"""(?x)   # Verbose regex syntax
         \$                      # A dollar sign,
         (?:                     # then
-            (?P<w1> \w+ ) |         # a plain word, or
             (?P<dollar> \$ ) |      # a dollar sign, or
+            (?P<word1> \w+ ) |      # a plain word, or
             {                       # a {-wrapped
-                (?P<w2> \w+ )           # word,
+                (?P<word2> \w+ )        # word,
                 (?:
                     (?P<strict> \? ) |      # strict or
                     -(?P<defval> [^}]* )    # defaulted
@@ -34,21 +34,21 @@ def substitute_variables(text, variables):
         )
         """
 
-    def dollar_replace(m):
+    def dollar_replace(match):
         """Called for each $replacement."""
         # Get the one group that matched.
-        groups = m.group('w1', 'w2', 'dollar')
+        groups = match.group('dollar', 'word1', 'word2')
         word = next(g for g in groups if g)
 
         if word == "$":
             return "$"
         elif word in variables:
             return variables[word]
-        elif m.group('strict'):
+        elif match.group('strict'):
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval')
+            return match.group('defval')
 
     text = re.sub(dollar_pattern, dollar_replace, text)
     return text

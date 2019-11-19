@@ -114,10 +114,10 @@ from cogutil import *
     dollar_pattern = r"""(?x)   # Verbose regex syntax
         \$                      # A dollar sign,
         (?:                     # then
-            (?P&lt;w1&gt; \w+ ) |         # a plain word, or
             (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
+            (?P&lt;word1&gt; \w+ ) |      # a plain word, or
             {                       # a {-wrapped
-                (?P&lt;w2&gt; \w+ )           # word,
+                (?P&lt;word2&gt; \w+ )        # word,
                 (?:
                     (?P&lt;strict&gt; \? ) |      # strict or
                     -(?P&lt;defval&gt; [^}]* )    # defaulted
@@ -141,7 +141,7 @@ from cogutil import *
     <div class="incremental">
     <!--[[[cog include_file(start_from="def dollar_replace", end_at='"""')   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(m):
+    def dollar_replace(match):
         """Called for each $replacement."""
     </pre>
     <!--[[[end]]] }}} -->
@@ -150,23 +150,23 @@ from cogutil import *
 
 <div class="slide">
     <h1>Replacement</h1>
-    <!--[[[cog include_file(start_from="dollar_replace", end_at="return m.group")   ]]] {{{ -->
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match.group")   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(m):
+    def dollar_replace(match):
         """Called for each $replacement."""
         # Get the one group that matched.
-        groups = m.group('w1', 'w2', 'dollar')
+        groups = match.group('dollar', 'word1', 'word2')
         word = next(g for g in groups if g)
 
         if word == "$":
             return "$"
         elif word in variables:
             return variables[word]
-        elif m.group('strict'):
+        elif match.group('strict'):
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval')
+            return match.group('defval')
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -207,23 +207,23 @@ from cogutil import *
 
 <div class="slide">
     <h1>Replacement</h1>
-    <!--[[[cog include_file(start_from="dollar_replace", end_at="return m.group")   ]]] {{{ -->
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match.group")   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(m):
+    def dollar_replace(match):
         """Called for each $replacement."""
         # Get the one group that matched.
-        groups = m.group('w1', 'w2', 'dollar')
+        groups = match.group('dollar', 'word1', 'word2')
         word = next(g for g in groups if g)
 
         if word == "$":
             return "$"
         elif word in variables:
             return variables[word]
-        elif m.group('strict'):
+        elif match.group('strict'):
             msg = "Variable {} is undefined: {!r}"
             raise NameError(msg.format(word, text))
         else:
-            return m.group('defval')
+            return match.group('defval')
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -252,10 +252,10 @@ from cogutil import *
         dollar_pattern = r"""(?x)   # Verbose regex syntax
             \$                      # A dollar sign,
             (?:                     # then
-                (?P&lt;w1&gt; \w+ ) |         # a plain word, or
                 (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
+                (?P&lt;word1&gt; \w+ ) |      # a plain word, or
                 {                       # a {-wrapped
-                    (?P&lt;w2&gt; \w+ )           # word,
+                    (?P&lt;word2&gt; \w+ )        # word,
                     (?:
                         (?P&lt;strict&gt; \? ) |      # strict or
                         -(?P&lt;defval&gt; [^}]* )    # defaulted
@@ -264,21 +264,21 @@ from cogutil import *
             )
             """
 
-        def dollar_replace(m):
+        def dollar_replace(match):
             """Called for each $replacement."""
             # Get the one group that matched.
-            groups = m.group('w1', 'w2', 'dollar')
+            groups = match.group('dollar', 'word1', 'word2')
             word = next(g for g in groups if g)
 
             if word == "$":
                 return "$"
             elif word in variables:
                 return variables[word]
-            elif m.group('strict'):
+            elif match.group('strict'):
                 msg = "Variable {} is undefined: {!r}"
                 raise NameError(msg.format(word, text))
             else:
-                return m.group('defval')
+                return match.group('defval')
 
         text = re.sub(dollar_pattern, dollar_replace, text)
         return text
