@@ -31,7 +31,8 @@ def test_substitute_variables_errors(text):
     assert "Variable NOTHING is undefined" in str(exc_info.value)
 
 def test_substitute():
-    before = "Look: $FOO ${BAR-default} $$"
-    data = {'FOO': 'Xyzzy'}
-    after = substitute_variables(before, data)
-    assert after == "Look: Xyzzy default $"
+    text = substitute_variables(
+        "Look: $FOO ${BAR-default} $$",
+        {'FOO': 'Xyzzy'},
+    )
+    assert text == "Look: Xyzzy default $"

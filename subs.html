@@ -72,7 +72,9 @@ from cogutil import *
     <!--[[[end]]] }}} -->
     <!--[[[cog include_file(start_from="def substitute", end_at='"""', end_nth=2)   ]]] {{{ -->
     <pre class='python'>
-    def substitute_variables(text, variables):
+    def substitute_variables(
+        text: str, variables: Mapping[str, str],
+    ) -&gt; str:
         """
         Substitute ``${VAR}`` variables in `text`.
 
@@ -99,10 +101,11 @@ from cogutil import *
     <!--[[[cog include_file(fname="test_substitute.py", start_from="test_substitute(", end_at="assert")   ]]] {{{ -->
     <pre class='python'>
     def test_substitute():
-        before = "Look: $FOO ${BAR-default} $$"
-        data = {'FOO': 'Xyzzy'}
-        after = substitute_variables(before, data)
-        assert after == "Look: Xyzzy default $"
+        text = substitute_variables(
+            "Look: $FOO ${BAR-default} $$",
+            {'FOO': 'Xyzzy'},
+        )
+        assert text == "Look: Xyzzy default $"
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -116,7 +119,7 @@ from cogutil import *
         (?:                     # then
             (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
             (?P&lt;word1&gt; \w+ ) |      # a plain word, or
-            {                       # a {-wrapped
+            \{                      # a {-wrapped
                 (?P&lt;word2&gt; \w+ )        # word,
                 (?:
                     (?P&lt;strict&gt; \? ) |      # strict or
@@ -141,7 +144,7 @@ from cogutil import *
     <div class="incremental">
     <!--[[[cog include_file(start_from="def dollar_replace", end_at='"""')   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(match):
+    def dollar_replace(match: re.Match[str]) -&gt; str:
         """Called for each $replacement."""
     </pre>
     <!--[[[end]]] }}} -->
@@ -150,9 +153,9 @@ from cogutil import *
 
 <div class="slide">
     <h1>Replacement</h1>
-    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match.group")   ]]] {{{ -->
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match")   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(match):
+    def dollar_replace(match: re.Match[str]) -&gt; str:
         """Called for each $replacement."""
         # Get the one group that matched.
         groups = match.group('dollar', 'word1', 'word2')
@@ -162,11 +165,11 @@ from cogutil import *
             return "$"
         elif word in variables:
             return variables[word]
-        elif match.group('strict'):
-            msg = "Variable {} is undefined: {!r}"
-            raise NameError(msg.format(word, text))
+        elif match["strict"]:
+            msg = f"Variable {word} is undefined: {text!r}"
+            raise NameError(msg)
         else:
-            return match.group('defval')
+            return match["defval"]
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -208,9 +211,9 @@ from cogutil import *
 
 <div class="slide">
     <h1>Replacement</h1>
-    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match.group")   ]]] {{{ -->
+    <!--[[[cog include_file(start_from="dollar_replace", end_at="return match")   ]]] {{{ -->
     <pre class='python'>
-    def dollar_replace(match):
+    def dollar_replace(match: re.Match[str]) -&gt; str:
         """Called for each $replacement."""
         # Get the one group that matched.
         groups = match.group('dollar', 'word1', 'word2')
@@ -220,11 +223,11 @@ from cogutil import *
             return "$"
         elif word in variables:
             return variables[word]
-        elif match.group('strict'):
-            msg = "Variable {} is undefined: {!r}"
-            raise NameError(msg.format(word, text))
+        elif match["strict"]:
+            msg = f"Variable {word} is undefined: {text!r}"
+            raise NameError(msg)
         else:
-            return match.group('defval')
+            return match["defval"]
     </pre>
     <!--[[[end]]] }}} -->
 </div>
@@ -232,7 +235,9 @@ from cogutil import *
 <div class="slide">
     <!--[[[cog include_file(start_from="def subs", classes="s40") ]]] {{{ -->
     <pre class='python s40'>
-    def substitute_variables(text, variables):
+    def substitute_variables(
+        text: str, variables: Mapping[str, str],
+    ) -&gt; str:
         """
         Substitute ``${VAR}`` variables in `text`.
 
@@ -255,7 +260,7 @@ from cogutil import *
             (?:                     # then
                 (?P&lt;dollar&gt; \$ ) |      # a dollar sign, or
                 (?P&lt;word1&gt; \w+ ) |      # a plain word, or
-                {                       # a {-wrapped
+                \{                      # a {-wrapped
                     (?P&lt;word2&gt; \w+ )        # word,
                     (?:
                         (?P&lt;strict&gt; \? ) |      # strict or
@@ -265,7 +270,7 @@ from cogutil import *
             )
             """
 
-        def dollar_replace(match):
+        def dollar_replace(match: re.Match[str]) -&gt; str:
             """Called for each $replacement."""
             # Get the one group that matched.
             groups = match.group('dollar', 'word1', 'word2')
@@ -275,11 +280,11 @@ from cogutil import *
                 return "$"
             elif word in variables:
                 return variables[word]
-            elif match.group('strict'):
-                msg = "Variable {} is undefined: {!r}"
-                raise NameError(msg.format(word, text))
+            elif match["strict"]:
+                msg = f"Variable {word} is undefined: {text!r}"
+                raise NameError(msg)
             else:
-                return match.group('defval')
+                return match["defval"]
 
         text = re.sub(dollar_pattern, dollar_replace, text)
         return text

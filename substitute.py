@@ -1,7 +1,12 @@
 import os
 import re
 
-def substitute_variables(text, variables):
+from collections.abc import Mapping
+
+
+def substitute_variables(
+    text: str, variables: Mapping[str, str],
+) -> str:
     """
     Substitute ``${VAR}`` variables in `text`.
 
@@ -24,7 +29,7 @@ def substitute_variables(text, variables):
         (?:                     # then
             (?P<dollar> \$ ) |      # a dollar sign, or
             (?P<word1> \w+ ) |      # a plain word, or
-            {                       # a {-wrapped
+            \{                      # a {-wrapped
                 (?P<word2> \w+ )        # word,
                 (?:
                     (?P<strict> \? ) |      # strict or
@@ -34,7 +39,7 @@ def substitute_variables(text, variables):
         )
         """
 
-    def dollar_replace(match):
+    def dollar_replace(match: re.Match[str]) -> str:
         """Called for each $replacement."""
         # Get the one group that matched.
         groups = match.group('dollar', 'word1', 'word2')
@@ -44,11 +49,11 @@ def substitute_variables(text, variables):
             return "$"
         elif word in variables:
             return variables[word]
-        elif match.group('strict'):
-            msg = "Variable {} is undefined: {!r}"
-            raise NameError(msg.format(word, text))
+        elif match["strict"]:
+            msg = f"Variable {word} is undefined: {text!r}"
+            raise NameError(msg)
         else:
-            return match.group('defval')
+            return match["defval"]
 
     text = re.sub(dollar_pattern, dollar_replace, text)
     return text
