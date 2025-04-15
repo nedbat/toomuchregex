@@ -73,7 +73,7 @@ from cogutil import *
     <!--[[[cog include_file(start_from="def substitute", end_at='"""', end_nth=2)   ]]] {{{ -->
     <pre class='python'>
     def substitute_variables(
-        text: str, variables: Mapping[str, str],
+        text: str, variables: dict[str, str],
     ) -&gt; str:
         """
         Substitute ``${VAR}`` variables in `text`.
@@ -236,7 +236,7 @@ from cogutil import *
     <!--[[[cog include_file(start_from="def subs", classes="s40") ]]] {{{ -->
     <pre class='python s40'>
     def substitute_variables(
-        text: str, variables: Mapping[str, str],
+        text: str, variables: dict[str, str],
     ) -&gt; str:
         """
         Substitute ``${VAR}`` variables in `text`.

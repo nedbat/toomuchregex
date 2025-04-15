@@ -1,11 +1,9 @@
 import os
 import re
 
-from collections.abc import Mapping
-
 
 def substitute_variables(
-    text: str, variables: Mapping[str, str],
+    text: str, variables: dict[str, str],
 ) -> str:
     """
     Substitute ``${VAR}`` variables in `text`.
